@@ -19,7 +19,6 @@
 #include "components/ble/ImmediateAlertService.h"
 #include "components/ble/ServiceDiscovery.h"
 #include "components/ble/MotionService.h"
-#include "components/ble/SimpleWeatherService.h"
 #include "components/fs/FS.h"
 
 namespace Pinetime {
@@ -57,10 +56,6 @@ namespace Pinetime {
         return anService;
       };
 
-      Pinetime::Controllers::SimpleWeatherService& weather() {
-        return weatherService;
-      };
-
       uint16_t connHandle();
       void NotifyBatteryLevel(uint8_t level);
 
@@ -88,7 +83,6 @@ namespace Pinetime {
       AlertNotificationService anService;
       AlertNotificationClient alertNotificationClient;
       CurrentTimeService currentTimeService;
-      SimpleWeatherService weatherService;
       BatteryInformationService batteryInformationService;
       ImmediateAlertService immediateAlertService;
       HeartRateService heartRateService;

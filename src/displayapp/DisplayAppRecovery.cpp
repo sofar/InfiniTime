@@ -114,6 +114,3 @@ void DisplayApp::PushMessage(Display::Messages msg) {
 
 void DisplayApp::Register(Pinetime::System::SystemTask* /*systemTask*/) {
 }
-
-void DisplayApp::Register(Pinetime::Controllers::SimpleWeatherService* /*weatherService*/) {
-}

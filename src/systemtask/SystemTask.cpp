@@ -140,7 +140,6 @@ void SystemTask::Work() {
   settingsController.Init();
 
   displayApp.Register(this);
-  displayApp.Register(&nimbleController.weather());
   displayApp.Start(bootError);
 
   heartRateSensor.Init();
