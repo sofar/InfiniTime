@@ -17,7 +17,6 @@
 #include "components/ble/FSService.h"
 #include "components/ble/HeartRateService.h"
 #include "components/ble/ImmediateAlertService.h"
-#include "components/ble/MusicService.h"
 #include "components/ble/NavigationService.h"
 #include "components/ble/ServiceDiscovery.h"
 #include "components/ble/MotionService.h"
@@ -54,10 +53,6 @@ namespace Pinetime {
       void StartAdvertising();
       int OnGAPEvent(ble_gap_event* event);
       void StartDiscovery();
-
-      Pinetime::Controllers::MusicService& music() {
-        return musicService;
-      };
 
       Pinetime::Controllers::NavigationService& navigation() {
         return navService;
@@ -98,7 +93,6 @@ namespace Pinetime {
       AlertNotificationService anService;
       AlertNotificationClient alertNotificationClient;
       CurrentTimeService currentTimeService;
-      MusicService musicService;
       SimpleWeatherService weatherService;
       NavigationService navService;
       BatteryInformationService batteryInformationService;

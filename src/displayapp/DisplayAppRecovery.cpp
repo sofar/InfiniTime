@@ -118,8 +118,5 @@ void DisplayApp::Register(Pinetime::System::SystemTask* /*systemTask*/) {
 void DisplayApp::Register(Pinetime::Controllers::SimpleWeatherService* /*weatherService*/) {
 }
 
-void DisplayApp::Register(Pinetime::Controllers::MusicService* /*musicService*/) {
-}
-
 void DisplayApp::Register(Pinetime::Controllers::NavigationService* /*NavigationService*/) {
 }
