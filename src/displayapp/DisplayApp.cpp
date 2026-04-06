@@ -17,7 +17,6 @@
 #include "displayapp/screens/Paddle.h"
 #include "displayapp/screens/StopWatch.h"
 #include "displayapp/screens/Metronome.h"
-#include "displayapp/screens/Navigation.h"
 #include "displayapp/screens/Notifications.h"
 #include "displayapp/screens/SystemInfo.h"
 #include "displayapp/screens/Tile.h"
@@ -126,8 +125,7 @@ DisplayApp::DisplayApp(Drivers::St7789& lcd,
                  timer,
                  nullptr,
                  this,
-                 lvgl,
-                 nullptr} {
+                 lvgl} {
 }
 
 void DisplayApp::Start(System::BootErrors error) {
@@ -720,10 +718,6 @@ void DisplayApp::Register(Pinetime::System::SystemTask* systemTask) {
 
 void DisplayApp::Register(Pinetime::Controllers::SimpleWeatherService* weatherService) {
   this->controllers.weatherController = weatherService;
-}
-
-void DisplayApp::Register(Pinetime::Controllers::NavigationService* NavigationService) {
-  this->controllers.navigationService = NavigationService;
 }
 
 void DisplayApp::ApplyBrightness() {

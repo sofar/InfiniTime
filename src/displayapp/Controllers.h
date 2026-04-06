@@ -24,7 +24,6 @@ namespace Pinetime {
     class SimpleWeatherService;
     class FS;
     class Timer;
-    class NavigationService;
   }
 
   namespace System {
@@ -50,7 +49,6 @@ namespace Pinetime {
       Pinetime::System::SystemTask* systemTask;
       Pinetime::Applications::DisplayApp* displayApp;
       Pinetime::Components::LittleVgl& lvgl;
-      Pinetime::Controllers::NavigationService* navigationService;
     };
   }
 }

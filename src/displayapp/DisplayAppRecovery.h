@@ -36,7 +36,6 @@ namespace Pinetime {
     class BrightnessController;
     class FS;
     class SimpleWeatherService;
-    class NavigationService;
   }
 
   namespace System {
@@ -72,7 +71,6 @@ namespace Pinetime {
       void PushMessage(Pinetime::Applications::Display::Messages msg);
       void Register(Pinetime::System::SystemTask* systemTask);
       void Register(Pinetime::Controllers::SimpleWeatherService* weatherService);
-      void Register(Pinetime::Controllers::NavigationService* NavigationService);
 
     private:
       TaskHandle_t taskHandle;
