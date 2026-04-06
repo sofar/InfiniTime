@@ -17,6 +17,6 @@ namespace Pinetime {
       static constexpr uint32_t minor = @PROJECT_VERSION_MINOR@;
       static constexpr uint32_t patch = @PROJECT_VERSION_PATCH@;
       static constexpr const char* commitHash = "@PROJECT_GIT_COMMIT_HASH@";
-      static constexpr const char* versionString = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@";
+      static constexpr const char* versionString = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@-@PROJECT_GIT_COMMIT_HASH@";
   };
 }
