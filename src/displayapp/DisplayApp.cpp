@@ -18,6 +18,7 @@
 #include "displayapp/screens/StopWatch.h"
 #include "displayapp/screens/Metronome.h"
 #include "displayapp/screens/Notifications.h"
+#include "displayapp/screens/Reminders.h"
 #include "displayapp/screens/SystemInfo.h"
 #include "displayapp/screens/Tile.h"
 #include "displayapp/screens/Twos.h"
@@ -120,6 +121,7 @@ DisplayApp::DisplayApp(Drivers::St7789& lcd,
                  motionController,
                  stopWatchController,
                  alarmController,
+                 reminderController,
                  brightnessController,
                  filesystem,
                  timer,
@@ -635,6 +637,9 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
       break;
     case Apps::BatteryInfo:
       currentScreen = std::make_unique<Screens::BatteryInfo>(batteryController);
+      break;
+    case Apps::Reminders:
+      currentScreen = std::make_unique<Screens::Reminders>(reminderController);
       break;
     case Apps::SysInfo:
       currentScreen = std::make_unique<Screens::SystemInfo>(this,

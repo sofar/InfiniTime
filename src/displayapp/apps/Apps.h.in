@@ -42,6 +42,7 @@ namespace Pinetime {
       SettingBluetooth,
       SettingOTA,
       SettingQuietHours,
+      Reminders,
       Error
     };
 

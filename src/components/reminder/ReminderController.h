@@ -104,6 +104,10 @@ namespace Pinetime {
 
       uint8_t EnabledCount() const;
 
+      Controllers::DateTime& GetDateTime() const {
+        return dateTimeController;
+      }
+
       std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> LastSyncTime() const {
         return lastSyncTime;
       }
