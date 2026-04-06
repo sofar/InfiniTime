@@ -450,6 +450,13 @@ void SystemTask::HandleSetOffReminder() {
     return;
   }
 
+  // High priority reminders end quiet hours entirely, restoring
+  // the user's previous notification state and blocking re-entry
+  // until the configured end hour passes.
+  if (priority >= 2 && settingsController.IsInQuietHours()) {
+    settingsController.OverrideQuietHours();
+  }
+
   if (IsSleeping()) {
     GoToRunning();
   }

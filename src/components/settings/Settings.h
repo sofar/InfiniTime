@@ -385,7 +385,7 @@ namespace Pinetime {
       }
 
       void EnterQuietHours() {
-        if (!settings.inQuietHours) {
+        if (!settings.inQuietHours && !quietHoursOverridden) {
           settings.notificationStatusBeforeQuietHours = settings.notificationStatus;
           settings.inQuietHours = true;
           settingsChanged = true;
@@ -399,6 +399,14 @@ namespace Pinetime {
           settingsChanged = true;
           SetNotificationStatus(settings.notificationStatusBeforeQuietHours);
         }
+        quietHoursOverridden = false;
+      }
+
+      // Exit quiet hours and block re-entry until the configured end hour.
+      // Used by high-priority reminders to permanently end the night.
+      void OverrideQuietHours() {
+        ExitQuietHours();
+        quietHoursOverridden = true;
       }
 
       bool IsInQuietHours() const {
@@ -447,6 +455,9 @@ namespace Pinetime {
       };
 
       SettingsData settings;
+      // Runtime-only flag (not persisted) — blocks quiet hours re-entry
+      // after a high-priority reminder overrides it.
+      bool quietHoursOverridden = false;
       bool settingsChanged = false;
 
       uint8_t appMenu = 0;
