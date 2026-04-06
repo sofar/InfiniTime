@@ -19,6 +19,7 @@
 #include "components/ble/ImmediateAlertService.h"
 #include "components/ble/ServiceDiscovery.h"
 #include "components/ble/MotionService.h"
+#include "components/ble/ReminderService.h"
 #include "components/fs/FS.h"
 
 namespace Pinetime {
@@ -46,7 +47,8 @@ namespace Pinetime {
                        Pinetime::Drivers::SpiNorFlash& spiNorFlash,
                        HeartRateController& heartRateController,
                        MotionController& motionController,
-                       FS& fs);
+                       FS& fs,
+                       ReminderController& reminderController);
       void Init();
       void StartAdvertising();
       int OnGAPEvent(ble_gap_event* event);
@@ -87,6 +89,7 @@ namespace Pinetime {
       ImmediateAlertService immediateAlertService;
       HeartRateService heartRateService;
       MotionService motionService;
+      ReminderService reminderService;
       FSService fsService;
       ServiceDiscovery serviceDiscovery;
 

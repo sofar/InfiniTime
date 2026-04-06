@@ -1,4 +1,5 @@
 #include "systemtask/SystemTask.h"
+#include <cstring>
 #include <hal/nrf_rtc.h>
 #include <libraries/gpiote/app_gpiote.h>
 #include <libraries/log/nrf_log.h>
@@ -41,6 +42,7 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
                        Controllers::DateTime& dateTimeController,
                        Controllers::StopWatchController& stopWatchController,
                        Controllers::AlarmController& alarmController,
+                       Controllers::ReminderController& reminderController,
                        Drivers::Watchdog& watchdog,
                        Pinetime::Controllers::NotificationManager& notificationManager,
                        Pinetime::Drivers::Hrs3300& heartRateSensor,
@@ -62,6 +64,7 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
     dateTimeController {dateTimeController},
     stopWatchController {stopWatchController},
     alarmController {alarmController},
+    reminderController {reminderController},
     watchdog {watchdog},
     notificationManager {notificationManager},
     heartRateSensor {heartRateSensor},
@@ -82,7 +85,8 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
                      spiNorFlash,
                      heartRateController,
                      motionController,
-                     fs) {
+                     fs,
+                     reminderController) {
 }
 
 void SystemTask::Start() {
@@ -130,6 +134,7 @@ void SystemTask::Work() {
   batteryController.Register(this);
   motionSensor.SoftReset();
   alarmController.Init(this);
+  reminderController.Init(this);
 
   // Reset the TWI device because the motion sensor chip most probably crashed it...
   twiMaster.Sleep();
@@ -231,6 +236,14 @@ void SystemTask::Work() {
         case Messages::SetOffAlarm:
           GoToRunning();
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::AlarmTriggered);
+          break;
+        case Messages::SetOffReminder:
+          HandleSetOffReminder();
+          break;
+        case Messages::SaveReminders:
+          // Schedule on SystemTask (lightweight), save on DisplayApp (needs more stack for LFS)
+          reminderController.ScheduleNextReminder();
+          displayApp.PushMessage(Pinetime::Applications::Display::Messages::SaveReminders);
           break;
         case Messages::BleConnected:
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::NotifyDeviceActivity);
@@ -396,6 +409,43 @@ void SystemTask::Work() {
     }
   }
 #pragma clang diagnostic pop
+}
+
+void SystemTask::HandleSetOffReminder() {
+  const Pinetime::Controllers::Reminder* reminder = reminderController.Get(reminderController.AlertingReminderId());
+  if (reminder == nullptr) {
+    return;
+  }
+
+  uint8_t priority = reminder->Priority();
+  bool dndActive = settingsController.GetNotificationStatus() != Pinetime::Controllers::Settings::Notification::On;
+
+  if (dndActive && priority < 2) {
+    reminderController.StopAlerting();
+    return;
+  }
+
+  if (IsSleeping()) {
+    GoToRunning();
+  }
+
+  Pinetime::Controllers::NotificationManager::Notification notif;
+  size_t len = strlen(reminder->message);
+  if (len > Pinetime::Controllers::NotificationManager::MaximumMessageSize() - 1) {
+    len = Pinetime::Controllers::NotificationManager::MaximumMessageSize() - 1;
+  }
+  std::memcpy(notif.message.data(), reminder->message, len);
+  notif.message[len] = '\0';
+  notif.size = len + 1;
+
+  if (priority >= 2) {
+    notif.category = Pinetime::Controllers::NotificationManager::Categories::IncomingCall;
+  } else {
+    notif.category = Pinetime::Controllers::NotificationManager::Categories::SimpleAlert;
+  }
+
+  notificationManager.Push(std::move(notif));
+  displayApp.PushMessage(Pinetime::Applications::Display::Messages::NewNotification);
 }
 
 void SystemTask::GoToRunning() {

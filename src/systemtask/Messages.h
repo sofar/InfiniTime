@@ -25,6 +25,8 @@ namespace Pinetime {
       OnChargingEvent,
       OnPairing,
       SetOffAlarm,
+      SetOffReminder,
+      SaveReminders,
       MeasureBatteryTimerExpired,
       BatteryPercentageUpdated,
       StartFileTransfer,
