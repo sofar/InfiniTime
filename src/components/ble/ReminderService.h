@@ -60,8 +60,9 @@ namespace Pinetime {
       ble_uuid128_t listCharUuid {CharUuid(0x03, 0x00)};     // Read: list all reminders
       ble_uuid128_t ackCharUuid {CharUuid(0x04, 0x00)};      // Notify: ack events
       ble_uuid128_t syncCharUuid {CharUuid(0x05, 0x00)};     // Write: clear all + bulk upload
+      ble_uuid128_t statusCharUuid {CharUuid(0x06, 0x00)};  // Read: uptime + status
 
-      struct ble_gatt_chr_def characteristicDefinition[6];
+      struct ble_gatt_chr_def characteristicDefinition[7];
       struct ble_gatt_svc_def serviceDefinition[2];
 
       Pinetime::System::SystemTask& systemTask;

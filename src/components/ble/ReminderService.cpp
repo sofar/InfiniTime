@@ -37,6 +37,7 @@ ReminderService::ReminderService(System::SystemTask& systemTask, ReminderControl
        .flags = BLE_GATT_CHR_F_NOTIFY,
        .val_handle = &ackHandle},
       {.uuid = &syncCharUuid.u, .access_cb = ReminderCallback, .arg = this, .flags = BLE_GATT_CHR_F_WRITE},
+      {.uuid = &statusCharUuid.u, .access_cb = ReminderCallback, .arg = this, .flags = BLE_GATT_CHR_F_READ},
       {0}},
     serviceDefinition {
       {.type = BLE_GATT_SVC_TYPE_PRIMARY, .uuid = &serviceUuid.u, .characteristics = characteristicDefinition},
@@ -141,6 +142,16 @@ int ReminderService::OnCommand(struct ble_gatt_access_ctxt* ctxt) {
         }
       }
       NRF_LOG_INFO("[ReminderService] Listed %u reminders", activeCount);
+
+    } else if (ble_uuid_cmp(ctxt->chr->uuid, &statusCharUuid.u) == 0) {
+      // Status: 4 bytes uptime (seconds, LE)
+      auto& dt = reminderController.GetDateTime();
+      uint32_t uptimeSecs = static_cast<uint32_t>(dt.Uptime().count());
+      int rc = os_mbuf_append(ctxt->om, &uptimeSecs, sizeof(uptimeSecs));
+      if (rc != 0) {
+        return BLE_ATT_ERR_INSUFFICIENT_RES;
+      }
+      NRF_LOG_INFO("[ReminderService] Status: uptime=%u s", uptimeSecs);
     }
   }
 
