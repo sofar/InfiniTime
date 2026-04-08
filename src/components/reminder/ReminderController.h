@@ -20,7 +20,7 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 #include <semphr.h>
-#include <array>
+#include <vector>
 #include <cstdint>
 #include "components/datetime/DateTimeController.h"
 #include "components/fs/FS.h"
@@ -33,9 +33,9 @@ namespace Pinetime {
   namespace Controllers {
 
     struct Reminder {
-      static constexpr uint8_t FormatVersion = 2;
+      static constexpr uint8_t FormatVersion = 3;
       static constexpr uint8_t MaxReminders = 10;
-      static constexpr uint8_t MaxMessageLen = 32;
+      static constexpr uint8_t MaxMessageLen = 64;
 
       // Flags bitmask
       static constexpr uint8_t FlagEnabled  = 0x01;
@@ -94,12 +94,12 @@ namespace Pinetime {
 
       uint8_t Count() const;
       const Reminder* Get(uint8_t id) const;
-      const std::array<Reminder, Reminder::MaxReminders>& GetAll() const {
+      const std::vector<Reminder>& GetAll() const {
         return reminders;
       }
 
       uint8_t ActiveCount() const {
-        return count;
+        return static_cast<uint8_t>(reminders.size());
       }
 
       uint8_t EnabledCount() const;
@@ -152,8 +152,7 @@ namespace Pinetime {
       TimerHandle_t saveTimer;
       SemaphoreHandle_t mutex;
 
-      std::array<Reminder, Reminder::MaxReminders> reminders;
-      uint8_t count = 0;
+      std::vector<Reminder> reminders;
 
       bool isAlerting = false;
       uint8_t alertingId = 0;

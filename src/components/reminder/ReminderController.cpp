@@ -55,9 +55,9 @@ void ReminderController::Init(System::SystemTask* systemTask) {
 }
 
 int ReminderController::FindById(uint8_t id) const {
-  for (uint8_t i = 0; i < count; i++) {
+  for (size_t i = 0; i < reminders.size(); i++) {
     if (reminders[i].id == id) {
-      return i;
+      return static_cast<int>(i);
     }
   }
   return -1;
@@ -75,14 +75,14 @@ bool ReminderController::AddOrUpdate(const Reminder& reminder) {
     reminders[idx] = reminder;
     reminders[idx].version = Reminder::FormatVersion;
   } else {
-    if (count >= Reminder::MaxReminders) {
+    if (reminders.size() >= Reminder::MaxReminders) {
       NRF_LOG_WARNING("[ReminderController] Cannot add reminder, storage full");
       xSemaphoreGive(mutex);
       return false;
     }
-    reminders[count] = reminder;
-    reminders[count].version = Reminder::FormatVersion;
-    count++;
+    Reminder r = reminder;
+    r.version = Reminder::FormatVersion;
+    reminders.push_back(r);
   }
   settingsChanged = true;
   lastSyncTime = dateTimeController.CurrentDateTime();
@@ -93,8 +93,8 @@ bool ReminderController::AddOrUpdate(const Reminder& reminder) {
 
 uint8_t ReminderController::EnabledCount() const {
   uint8_t enabled = 0;
-  for (uint8_t i = 0; i < count; i++) {
-    if (reminders[i].IsEnabled()) {
+  for (const auto& r : reminders) {
+    if (r.IsEnabled()) {
       enabled++;
     }
   }
@@ -108,11 +108,7 @@ bool ReminderController::Delete(uint8_t id) {
     xSemaphoreGive(mutex);
     return false;
   }
-  for (uint8_t i = idx; i < count - 1; i++) {
-    reminders[i] = reminders[i + 1];
-  }
-  reminders[count - 1] = Reminder {};
-  count--;
+  reminders.erase(reminders.begin() + idx);
   settingsChanged = true;
   xSemaphoreGive(mutex);
   DeferSaveAndSchedule();
@@ -121,10 +117,7 @@ bool ReminderController::Delete(uint8_t id) {
 
 void ReminderController::ClearAll() {
   xSemaphoreTake(mutex, portMAX_DELAY);
-  for (uint8_t i = 0; i < Reminder::MaxReminders; i++) {
-    reminders[i] = Reminder {};
-  }
-  count = 0;
+  reminders.clear();
   settingsChanged = true;
   xTimerStop(reminderTimer, 0);
   xSemaphoreGive(mutex);
@@ -132,7 +125,7 @@ void ReminderController::ClearAll() {
 }
 
 uint8_t ReminderController::Count() const {
-  return count;
+  return static_cast<uint8_t>(reminders.size());
 }
 
 const Reminder* ReminderController::Get(uint8_t id) const {
@@ -151,7 +144,7 @@ void ReminderController::ScheduleNextReminder() {
 
   int64_t bestSeconds = -1;
 
-  for (uint8_t i = 0; i < count; i++) {
+  for (size_t i = 0; i < reminders.size(); i++) {
     if (!reminders[i].IsEnabled()) {
       continue;
     }
@@ -291,18 +284,17 @@ void ReminderController::LoadSettingsFromFile() {
     return;
   }
 
-  count = 0;
+  reminders.clear();
   for (uint8_t i = 0; i < storedCount; i++) {
     Reminder r;
     fs.FileRead(&lfsFile, reinterpret_cast<uint8_t*>(&r), sizeof(Reminder));
     if (r.version == Reminder::FormatVersion) {
-      reminders[count] = r;
-      count++;
+      reminders.push_back(r);
     }
   }
   fs.FileClose(&lfsFile);
 
-  NRF_LOG_INFO("[ReminderController] Loaded %u reminders from file", count);
+  NRF_LOG_INFO("[ReminderController] Loaded %u reminders from file", reminders.size());
 }
 
 void ReminderController::SaveSettingsToFile() {
@@ -317,11 +309,12 @@ void ReminderController::SaveSettingsToFile() {
     return;
   }
 
-  fs.FileWrite(&lfsFile, &count, sizeof(count));
-  fs.FileWrite(&lfsFile, reinterpret_cast<const uint8_t*>(reminders.data()), count * sizeof(Reminder));
+  uint8_t cnt = static_cast<uint8_t>(reminders.size());
+  fs.FileWrite(&lfsFile, &cnt, sizeof(cnt));
+  fs.FileWrite(&lfsFile, reinterpret_cast<const uint8_t*>(reminders.data()), cnt * sizeof(Reminder));
   fs.FileClose(&lfsFile);
 
-  NRF_LOG_INFO("[ReminderController] Saved %u reminders to file", count);
+  NRF_LOG_INFO("[ReminderController] Saved %u reminders to file", cnt);
 }
 
 void ReminderController::DeferSaveAndSchedule() {
@@ -341,6 +334,6 @@ void ReminderController::SaveAndScheduleNow() {
   xSemaphoreTake(mutex, portMAX_DELAY);
   settingsChanged = false;
   ScheduleNextReminder();
-  NRF_LOG_INFO("[ReminderController] Schedule complete (%u reminders), save deferred to DisplayApp", count);
+  NRF_LOG_INFO("[ReminderController] Schedule complete (%u reminders), save deferred to DisplayApp", reminders.size());
   xSemaphoreGive(mutex);
 }
